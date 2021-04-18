@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
 
 # Note: update this to your new project's name and version
 project(
-  Greeter
+  UnknownTwitchGame
   VERSION 1.0
   LANGUAGES CXX
 )
@@ -26,13 +26,6 @@ include(cmake/CPM.cmake)
 # PackageProject.cmake will be used to make our target installable
 CPMAddPackage("gh:TheLartians/PackageProject.cmake@1.6.0")
 
-CPMAddPackage(
-  NAME fmt
-  GIT_TAG 7.1.3
-  GITHUB_REPOSITORY fmtlib/fmt
-  OPTIONS "FMT_INSTALL YES" # create an installable target
-)
-
 # ---- Add source files ----
 
 # Note: globbing sources is considered bad practice as CMake's generators may not detect new files
@@ -43,19 +36,16 @@ file(GLOB_RECURSE sources CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/source/
 # ---- Create library ----
 
 # Note: for header-only libraries change all PUBLIC flags to INTERFACE and create an interface
-# target: add_library(Greeter INTERFACE)
-add_library(Greeter ${headers} ${sources})
+# target: add_library(UnknownTwitchGame INTERFACE)
+add_library(UnknownTwitchGame ${headers} ${sources})
 
-set_target_properties(Greeter PROPERTIES CXX_STANDARD 17)
+set_target_properties(UnknownTwitchGame PROPERTIES CXX_STANDARD 17)
 
 # being a cross-platform target, we enforce standards conformance on MSVC
-target_compile_options(Greeter PUBLIC "$<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/permissive>")
-
-# Link dependencies
-target_link_libraries(Greeter PRIVATE fmt::fmt)
+target_compile_options(UnknownTwitchGame PUBLIC "$<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/permissive>")
 
 target_include_directories(
-  Greeter PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+  UnknownTwitchGame PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
                  $<INSTALL_INTERFACE:include/${PROJECT_NAME}-${PROJECT_VERSION}>
 )
 
@@ -75,5 +65,4 @@ packageProject(
   INCLUDE_DESTINATION include/${PROJECT_NAME}-${PROJECT_VERSION}
   VERSION_HEADER "${VERSION_HEADER_LOCATION}"
   COMPATIBILITY SameMajorVersion
-  DEPENDENCIES "fmt 7.1.3"
 )

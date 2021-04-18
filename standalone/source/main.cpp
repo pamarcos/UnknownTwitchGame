@@ -1,53 +1,85 @@
-#include <greeter/greeter.h>
-#include <greeter/version.h>
+/*
+ * Copyright (C) 2011 Fredi Machado <https://github.com/fredimachado>
+ * IRCClient is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3.0 of the License, or any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * http://www.gnu.org/licenses/lgpl.html
+ */
 
-#include <cxxopts.hpp>
+#include "irc/IRCClient.h"
+#include <algorithm>
+#include <cstdlib>
 #include <iostream>
-#include <string>
-#include <unordered_map>
+#include <map>
+#include <signal.h>
 
-auto main(int argc, char **argv) -> int {
-    const std::unordered_map<std::string, greeter::LanguageCode> languages{
-        {"en", greeter::LanguageCode::EN},
-        {"de", greeter::LanguageCode::DE},
-        {"es", greeter::LanguageCode::ES},
-        {"fr", greeter::LanguageCode::FR},
-    };
+void msgCommand(std::string arguments, IRCClient *client) {
+    std::string to = arguments.substr(0, arguments.find(" "));
+    std::string text = arguments.substr(arguments.find(" ") + 1);
 
-    cxxopts::Options options(*argv, "A program to welcome the world!");
+    std::cout << "To " + to + ": " + text << std::endl;
+    client->SendIRC("PRIVMSG " + to + " :" + text);
+}
 
-    std::string language;
-    std::string name;
+void joinCommand(std::string channel, IRCClient *client) {
+    if (channel[0] != '#')
+        channel = "#" + channel;
 
-    // clang-format off
-  options.add_options()
-    ("h,help", "Show help")
-    ("v,version", "Print the current version number")
-    ("n,name", "Name to greet", cxxopts::value(name)->default_value("World"))
-    ("l,lang", "Language code to use", cxxopts::value(language)->default_value("en"))
-  ;
-    // clang-format on
+    client->SendIRC("JOIN " + channel);
+}
 
-    auto result = options.parse(argc, argv);
+void partCommand(std::string channel, IRCClient *client) {
+    if (channel[0] != '#')
+        channel = "#" + channel;
 
-    if (result["help"].as<bool>()) {
-        std::cout << options.help() << std::endl;
-        return 0;
-    }
+    client->SendIRC("PART " + channel);
+}
 
-    if (result["version"].as<bool>()) {
-        std::cout << "Greeter, version " << GREETER_VERSION << std::endl;
-        return 0;
-    }
-
-    auto langIt = languages.find(language);
-    if (langIt == languages.end()) {
-        std::cerr << "unknown language code: " << language << std::endl;
+int main(int argc, char *argv[]) {
+    if (argc < 3) {
+        std::cout << "Insuficient parameters: host port [nick] [user]"
+                  << std::endl;
         return 1;
     }
 
-    greeter::Greeter greeter(name);
-    std::cout << greeter.greet(langIt->second) << std::endl;
+    char *host = argv[1];
+    int port = atoi(argv[2]);
+    std::string nick("MyIRCClient");
+    std::string user("IRCClient");
 
-    return 0;
+    if (argc >= 4)
+        nick = argv[3];
+    if (argc >= 5)
+        user = argv[4];
+
+    IRCClient client;
+
+    client.Debug(true);
+
+    if (client.InitSocket()) {
+        std::cout << "Socket initialized. Connecting..." << std::endl;
+
+        if (client.Connect(host, port)) {
+            std::cout << "Connected. Loggin in..." << std::endl;
+
+            if (client.Login(nick, user)) {
+                std::cout << "Logged." << std::endl;
+
+                while (client.Connected())
+                    client.ReceiveData();
+            }
+
+            if (client.Connected())
+                client.Disconnect();
+
+            std::cout << "Disconnected." << std::endl;
+        }
+    }
 }
