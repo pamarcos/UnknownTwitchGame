@@ -20,18 +20,15 @@
 
 #define NUM_IRC_CMDS 26
 
-struct IRCCommandHandler
-{
+struct IRCCommandHandler {
     std::string command;
     void (IRCClient::*handler)(IRCMessage /*message*/);
 };
 
 extern IRCCommandHandler ircCommandTable[NUM_IRC_CMDS];
 
-inline int GetCommandHandler(std::string command)
-{
-    for (int i = 0; i < NUM_IRC_CMDS; ++i)
-    {
+inline int GetCommandHandler(std::string command) {
+    for (int i = 0; i < NUM_IRC_CMDS; ++i) {
         if (ircCommandTable[i].command == command)
             return i;
     }

@@ -20,28 +20,6 @@
 #include <map>
 #include <signal.h>
 
-void msgCommand(std::string arguments, IRCClient *client) {
-    std::string to = arguments.substr(0, arguments.find(" "));
-    std::string text = arguments.substr(arguments.find(" ") + 1);
-
-    std::cout << "To " + to + ": " + text << std::endl;
-    client->SendIRC("PRIVMSG " + to + " :" + text);
-}
-
-void joinCommand(std::string channel, IRCClient *client) {
-    if (channel[0] != '#')
-        channel = "#" + channel;
-
-    client->SendIRC("JOIN " + channel);
-}
-
-void partCommand(std::string channel, IRCClient *client) {
-    if (channel[0] != '#')
-        channel = "#" + channel;
-
-    client->SendIRC("PART " + channel);
-}
-
 int main(int argc, char *argv[]) {
     if (argc < 3) {
         std::cout << "Insuficient parameters: host port [nick] [user]"
@@ -51,8 +29,8 @@ int main(int argc, char *argv[]) {
 
     char *host = argv[1];
     int port = atoi(argv[2]);
-    std::string nick("MyIRCClient");
-    std::string user("IRCClient");
+    std::string nick("nietmetal");
+    std::string user("nietmetal");
 
     if (argc >= 4)
         nick = argv[3];
@@ -69,15 +47,19 @@ int main(int argc, char *argv[]) {
         if (client.Connect(host, port)) {
             std::cout << "Connected. Loggin in..." << std::endl;
 
-            if (client.Login(nick, user)) {
+            if (client.Login(nick, user, getenv("TWITCH_PASS"))) {
                 std::cout << "Logged." << std::endl;
 
-                while (client.Connected())
+                client.SendIRC("JOIN #nietmetal");
+
+                while (client.Connected()) {
                     client.ReceiveData();
+                }
             }
 
-            if (client.Connected())
+            if (client.Connected()) {
                 client.Disconnect();
+            }
 
             std::cout << "Disconnected." << std::endl;
         }

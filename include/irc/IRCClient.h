@@ -10,39 +10,35 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
- * http://www.gnu.org/licenses/lgpl.html 
+ * http://www.gnu.org/licenses/lgpl.html
  */
 
 #ifndef _IRCCLIENT_H
 #define _IRCCLIENT_H
 
+#include "IRCSocket.h"
+#include <list>
 #include <string>
 #include <vector>
-#include <list>
-#include "IRCSocket.h"
 
 class IRCClient;
 
-extern std::vector<std::string> split(std::string const&, char);
+extern std::vector<std::string> split(std::string const &, char);
 
-struct IRCCommandPrefix
-{
-    void Parse(std::string data)
-    {
+struct IRCCommandPrefix {
+    void Parse(std::string data) {
         if (data == "")
             return;
 
         prefix = data.substr(1, data.find(" ") - 1);
         std::vector<std::string> tokens;
 
-        if (prefix.find("@") != std::string::npos)
-        {
+        if (prefix.find("@") != std::string::npos) {
             tokens = split(prefix, '@');
             nick = tokens.at(0);
             host = tokens.at(1);
         }
-        if (nick != "" && nick.find("!") != std::string::npos)
-        {
+        if (nick != "" && nick.find("!") != std::string::npos) {
             tokens = split(nick, '!');
             nick = tokens.at(0);
             user = tokens.at(1);
@@ -55,42 +51,43 @@ struct IRCCommandPrefix
     std::string host;
 };
 
-struct IRCMessage
-{
+struct IRCMessage {
     IRCMessage();
-    IRCMessage(std::string cmd, IRCCommandPrefix p, std::vector<std::string> params) :
-        command(cmd), prefix(p), parameters(params) {};
+    IRCMessage(std::string cmd, IRCCommandPrefix p,
+               std::vector<std::string> params)
+        : command(cmd), prefix(p), parameters(params){};
 
     std::string command;
     IRCCommandPrefix prefix;
     std::vector<std::string> parameters;
 };
 
-struct IRCCommandHook
-{
-    IRCCommandHook() : function(NULL) {};
+struct IRCCommandHook {
+    IRCCommandHook() : function(NULL){};
 
     std::string command;
-    void (*function)(IRCMessage /*message*/, IRCClient* /*client*/);
+    void (*function)(IRCMessage /*message*/, IRCClient * /*client*/);
 };
 
-class IRCClient
-{
-public:
-    IRCClient() : _debug(false) {};
+class IRCClient {
+  public:
+    IRCClient() : _debug(false){};
 
     bool InitSocket();
-    bool Connect(char* /*host*/, int /*port*/);
+    bool Connect(char * /*host*/, int /*port*/);
     void Disconnect();
     bool Connected() { return _socket.Connected(); };
 
     bool SendIRC(std::string /*data*/);
 
-    bool Login(std::string /*nick*/, std::string /*user*/, std::string /*password*/ = std::string());
+    bool Login(std::string /*nick*/, std::string /*user*/,
+               std::string /*password*/ = std::string());
 
     void ReceiveData();
 
-    void HookIRCCommand(std::string /*command*/, void (*function)(IRCMessage /*message*/, IRCClient* /*client*/));
+    void HookIRCCommand(std::string /*command*/,
+                        void (*function)(IRCMessage /*message*/,
+                                         IRCClient * /*client*/));
 
     void Parse(std::string /*data*/);
 
@@ -108,7 +105,7 @@ public:
 
     void Debug(bool debug) { _debug = debug; };
 
-private:
+  private:
     void HandleCommand(IRCMessage /*message*/);
     void CallHook(std::string /*command*/, IRCMessage /*message*/);
 

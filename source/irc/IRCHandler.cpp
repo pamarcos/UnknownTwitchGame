@@ -79,12 +79,11 @@ void IRCClient::HandlePrivMsg(IRCMessage message) {
         return;
     }
 
-    // if (to[0] == '#')
-    //     std::cout << "From " + message.prefix.nick << " @ " + to + ": " <<
-    //     text << std::endl;
-    // else
-    //     std::cout << "From " + message.prefix.nick << ": " << text <<
-    //     std::endl;
+    if (to[0] == '#')
+        std::cout << "From " + message.prefix.nick << " @ " + to + ": " << text
+                  << std::endl;
+    else
+        std::cout << "From " + message.prefix.nick << ": " << text << std::endl;
 }
 
 void IRCClient::HandleNotice(IRCMessage message) {

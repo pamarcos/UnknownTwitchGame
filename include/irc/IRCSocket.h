@@ -10,7 +10,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
- * http://www.gnu.org/licenses/lgpl.html 
+ * http://www.gnu.org/licenses/lgpl.html
  */
 
 #ifndef _IRCSOCKET_H
@@ -21,32 +21,31 @@
 
 #ifdef _WIN32
 #include <winsock2.h>
-#pragma comment(lib,"WS2_32")
+#pragma comment(lib, "WS2_32")
 #else
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <netdb.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/types.h>
 #define closesocket(s) close(s)
 #define close(s)
 #define SOCKET_ERROR -1
 #define INVALID_SOCKET -1
 #endif
 
-class IRCSocket
-{
-public:
+class IRCSocket {
+  public:
     bool Init();
 
-    bool Connect(char const* host, int port);
+    bool Connect(char const *host, int port);
     void Disconnect();
 
     bool Connected() { return _connected; };
 
-    bool SendData(char const* data);
+    bool SendData(char const *data);
     std::string ReceiveData();
 
-private:
+  private:
     int _socket;
 
     bool _connected;
